@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Advanced Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 0.95em;
+        }
+
+        .operations {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+
+        .op-button {
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .op-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .op-button.active {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .math-op { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .add { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .subtract { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .multiply { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .divide { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .palindrome { background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); }
+        .perfect { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: #333; }
+
+        .form-group {
+            margin-bottom: 25px;
+            display: none;
+        }
+
+        .form-group.active {
+            display: block;
+        }
+
+        .form-group.hidden {
+            display: none !important;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            color: #333;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        .input-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .input-row.full {
+            grid-template-columns: 1fr;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .submit-btn {
+            flex: 1;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .reset-btn {
+            flex: 1;
+            padding: 15px;
+            background: #f0f0f0;
+            color: #333;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .reset-btn:hover {
+            background: #e0e0e0;
+            border-color: #999;
+        }
+
+        .result-box {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: 600;
+            display: none;
+        }
+
+        .result-box.show {
+            display: block;
+        }
+
+        .result-math {
+            background: linear-gradient(135deg, rgba(240, 147, 251, 0.2) 0%, rgba(245, 87, 108, 0.2) 100%);
+            color: #c2185b;
+            border-left: 5px solid #f5576c;
+        }
+
+        .result-palindrome {
+            background: linear-gradient(135deg, rgba(48, 207, 208, 0.2) 0%, rgba(51, 8, 103, 0.2) 100%);
+            color: #0d47a1;
+            border-left: 5px solid #30cfd0;
+        }
+
+        .result-perfect {
+            background: linear-gradient(135deg, rgba(168, 237, 234, 0.2) 0%, rgba(254, 214, 227, 0.2) 100%);
+            color: #4a148c;
+            border-left: 5px solid #a8edea;
+        }
+
+        .operation-title {
+            text-align: center;
+            color: #667eea;
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧮 Calculator</h1>
+        <p class="subtitle">Choose an operation and enter your numbers</p>
+
+        <form method="post" id="calcForm" onsubmit="return handleSubmit(event)">
+            <!-- Operation Buttons -->
+            <div class="operations">
+                <button type="button" class="op-button add" onclick="selectOperation(event, 1)">🧮 BODMAS</button>
+                <button type="button" class="op-button palindrome" onclick="selectOperation(event, 5)">🔢 Palindrome</button>
+                <button type="button" class="op-button perfect" onclick="selectOperation(event, 6)">⭐ Perfect Num</button>
+            </div>
+
+            <!-- BODMAS Calculator Field -->
+            <div id="math-fields" class="form-group active">
+                <div class="operation-title" id="op-title">BODMAS Calculator</div>
+                <div class="input-row full">
+                    <input type="text" name="expression" id="expression" placeholder="e.g., 2+3*4 or (10-5)/2">
+                </div>
+            </div>
+
+            <!-- Palindrome Field -->
+            <div id="palindrome-fields" class="form-group">
+                <div class="operation-title">Palindrome Check</div>
+                <div class="input-row full">
+                    <input type="number" name="palnum" id="palnum" placeholder="Enter any number" step="1">
+                </div>
+            </div>
+
+            <!-- Perfect Number Field -->
+            <div id="perfect-fields" class="form-group">
+                <div class="operation-title">Perfect Number Check</div>
+                <div class="input-row full">
+                    <input type="number" name="perfnum" id="perfnum" placeholder="Enter any number" step="1">
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="button-group">
+                <button type="submit" class="submit-btn">Calculate</button>
+                <button type="reset" class="reset-btn" onclick="resetForm()">Clear</button>
+            </div>
+        </form>
+
+        <!-- Results -->
+        {% if calc_result != "" %}
+            <div class="result-box show result-math">
+                ✅ BODMAS Result: <strong>{{ calc_result }}</strong>
+            </div>
+        {% endif %}
+        {% if palindrome_result != "" %}
+            <div class="result-box show result-palindrome">
+                🔢 <strong>{{ palindrome_result }}</strong>
+            </div>
+        {% endif %}
+        {% if perfect_result != "" %}
+            <div class="result-box show result-perfect">
+                ⭐ <strong>{{ perfect_result }}</strong>
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        let currentOperation = 1;
+
+        function selectOperation(event, op) {
+            event.preventDefault();
+            currentOperation = op;
+
+            // Update button styles
+            document.querySelectorAll('.op-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Toggle form fields
+            const mathFields = document.getElementById('math-fields');
+            const palindromeFields = document.getElementById('palindrome-fields');
+            const perfectFields = document.getElementById('perfect-fields');
+
+            mathFields.classList.remove('active');
+            palindromeFields.classList.remove('active');
+            perfectFields.classList.remove('active');
+
+            if (op === 5) {
+                palindromeFields.classList.add('active');
+                setTimeout(() => document.getElementById('palnum').focus(), 100);
+            } else if (op === 6) {
+                perfectFields.classList.add('active');
+                setTimeout(() => document.getElementById('perfnum').focus(), 100);
+            } else {
+                mathFields.classList.add('active');
+                document.getElementById('op-title').textContent = 'BODMAS Calculator';
+                setTimeout(() => document.getElementById('expression').focus(), 100);
+            }
+        }
+
+        function handleSubmit(event) {
+            const mathFields = document.getElementById('math-fields');
+            const palindromeFields = document.getElementById('palindrome-fields');
+            const perfectFields = document.getElementById('perfect-fields');
+            
+            // Save current values
+            const expValue = document.getElementById('expression').value.trim();
+            const palnumValue = document.getElementById('palnum').value.trim();
+            const perfnumValue = document.getElementById('perfnum').value.trim();
+            
+            // Clear all fields
+            document.getElementById('expression').value = '';
+            document.getElementById('palnum').value = '';
+            document.getElementById('perfnum').value = '';
+            
+            // Set value back only for active field
+            if (mathFields.classList.contains('active')) {
+                if (!expValue) {
+                    alert('Please enter an expression');
+                    return false;
+                }
+                document.getElementById('expression').value = expValue;
+            } else if (palindromeFields.classList.contains('active')) {
+                if (!palnumValue) {
+                    alert('Please enter a number for palindrome check');
+                    return false;
+                }
+                document.getElementById('palnum').value = palnumValue;
+            } else if (perfectFields.classList.contains('active')) {
+                if (!perfnumValue) {
+                    alert('Please enter a number for perfect number check');
+                    return false;
+                }
+                document.getElementById('perfnum').value = perfnumValue;
+            }
+            return true;
+        }
+
+        function resetForm() {
+            document.getElementById('calcForm').reset();
+            selectOperation({preventDefault: () => {}, target: document.querySelectorAll('.op-button')[0]}, 1);
+        }
+
+        // Initialize with BODMAS selected
+        document.addEventListener('DOMContentLoaded', function() {
+            selectOperation({preventDefault: () => {}, target: document.querySelectorAll('.op-button')[0]}, 1);
+        });
+    </script>
+</body>
+</html>
